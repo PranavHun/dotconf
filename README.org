@@ -1,0 +1,23 @@
+#+TITLE: DotConf
+#+DESCRIPTION: All dot files
+#+Options: toc: 2
+* Contents :toc:
+- [[#alacritty][Alacritty]]
+- [[#emacs][Emacs]]
+- [[#vim][Vim]]
+
+* Alacritty
+Run Command:
+#+begin_src bash
+alacritty --config-file $DOTCONF_DIR/alacritty/alacritty.yml
+#+end_src
+* Emacs
+Run Command:
+#+begin_src bash
+emac --init-directory $DOTCONF_DIR/emacs
+#+end_src
+* Vim
+Run Command:
+#+begin_src bash
+vim -u $DOTCONF_DIR/vim/.vimrc
+#+end_src
