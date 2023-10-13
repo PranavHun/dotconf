@@ -1,0 +1,163 @@
+#+TITLE: Emacs Config
+#+AUTHOR: Pranav Hundekari (PranavHun)
+#+DESCRIPTION: Emacs config for C/C++, Python, Rust development.
+#+STARTUP: showeverything
+#+Options: toc: 3
+* Contents :toc:
+- [[#elementary-configuration][Elementary Configuration]]
+  - [[#packages][Packages]]
+  - [[#emacs-interface][Emacs Interface]]
+- [[#rest][Rest]]
+
+* Elementary Configuration
+** Packages
+#+begin_src emacs-lisp
+      (require 'package)
+      (add-to-list 'package-archives
+		   '("melpa-stable" . "https://stable.melpa.org/packages/"))
+      (package-initialize)
+
+      (use-package dracula-theme
+        :ensure t)
+      (use-package toc-org
+	:ensure t
+	:commands toc-org-enable
+	:init (add-hook 'org-mode-hook 'toc-org-enable))
+      (use-package org-bullets
+	:ensure t
+	:init (add-hook 'org-mode-hook (lambda () (org-bullets-mode 1))))
+      (use-package which-key
+	:ensure t
+	:init (which-key-mode 1)
+	:config
+	(setq which-key-side-window-location 'bottom
+	      whick-key-sort-order #'which-key-key-order-alpha
+	      which-key-sort-uppercase-first nil
+	      which-key-add-column-padding 1
+	      which-key-max-display-columns nil
+	      which-key-min-display-lines 6
+	      which-key-side-window-slot -10
+	      which-key-side-window-max-height 0.25
+	      which-key-dile-delay 0.8
+	      which-key-max-description-length 25
+	      which-key-allow-imprecise-window-fit t
+	      which-key-separator " → "))
+      (use-package evil
+	:ensure t
+	:init (evil-mode 1))
+
+#+end_src
+** Emacs Interface
+*** Startup Screen
+#+begin_src emacs-lisp
+  (setq inhibit-startup-screen t)
+  (add-hook 'emacs-startup-hook 'pranavhun-splash-fcn)
+  (defun pranavhun-splash-fcn ()
+    "Pranav Hun's splash screen"
+    (let ((splash-screen-buffer (get-buffer-create "splashscreenbuf")))
+      (with-current-buffer splash-screen-buffer
+	;; Buffer in insert
+	 (insert "\n\n\n\
+  \t\tPranav Hundekari\n\
+  \t\tEmacs Development Environment\n\
+  \t\thttps://github.com/PranavHun/\n\
+      _______                                              __    __                           \n\
+     /       \\                                            /  |  /  |                         \n\
+     $$$$$$$  |______  ______  _______   ______  __     __$$ |  $$ |__    __ _______          \n\
+     $$ |__$$ /      \\/      \\/       \\ /      \\/  \\   /  $$ |__$$ /  |  /  /       \\   \n\
+     $$    $$/$$$$$$  $$$$$$  $$$$$$$  |$$$$$$  $$  \\ /$$/$$    $$ $$ |  $$ $$$$$$$  |       \n\
+     $$$$$$$/$$ |  $$//    $$ $$ |  $$ |/    $$ |$$  /$$/ $$$$$$$$ $$ |  $$ $$ |  $$ |        \n\
+     $$ |    $$ |    /$$$$$$$ $$ |  $$ /$$$$$$$ | $$ $$/  $$ |  $$ $$ \\__$$ $$ |  $$ |       \n\
+     $$ |    $$ |    $$    $$ $$ |  $$ $$    $$ |  $$$/   $$ |  $$ $$    $$/$$ |  $$ |        \n\
+     $$/     $$/      $$$$$$$/$$/   $$/ $$$$$$$/    $/    $$/   $$/ $$$$$$/ $$/   $$/\n"))
+       (switch-to-buffer splash-screen-buffer)
+       (read-only-mode)(toggle-truncate-lines t)))
+#+end_src
+*** Set/Hide interface elements
+#+begin_src emacs-lisp
+    (fringe-mode -1)
+    (menu-bar-mode -1)
+    (scroll-bar-mode -1)
+    (tool-bar-mode -1)
+  (global-display-line-numbers-mode 1)
+  (global-visual-line-mode t)
+#+end_src
+*** Font
+#+begin_src emacs-lisp
+    (set-face-attribute 'default nil
+			:font "Source Code Pro"
+			:height 160
+			:weight 'regular)
+    (set-face-attribute 'variable-pitch nil
+			:font "Cantarell"
+			:height 160
+			:weight 'medium)
+    (set-face-attribute 'fixed-pitch nil
+			:font "Source Code Pro"
+			:height 160
+			:weight 'regular)
+    (set-face-attribute 'font-lock-comment-face nil
+			:slant 'italic)
+    (set-face-attribute 'font-lock-keyword-face nil
+			:slant 'italic)
+
+  (add-to-list 'default-frame-alist '(font . "Source Code Pro-16"))
+  (setq-default line-spacing 0.12)
+	;;  (custom-set-faces
+	;;    '(default ((t (:family "Source Code Pro" :foundry "ADBO" :slant normal :weight regular :height 160 :width normal)))))
+#+end_src
+*** Theme
+#+begin_src emacs-lisp
+  ;; Dracula theme is downloaded at ./themes
+ (load-theme 'dracula t)
+#+end_src
+*** Transparency
+#+begin_src emacs-lisp
+  (set-frame-parameter nil 'alpha-background 70)
+  (set-frame-parameter nil 'background-color "black")
+#+end_src
+
+* Rest
+;; 
+;; ;; sample `helm' configuration use https://github.com/emacs-helm/helm/ for details
+;; (helm-mode)
+;; (require 'helm-xref)
+;; (define-key global-map [remap find-file] #'helm-find-files)
+;; (define-key global-map [remap execute-extended-command] #'helm-M-x)
+;; (define-key global-map [remap switch-to-buffer] #'helm-mini)
+;; 
+;; (which-key-mode)
+;; (add-hook 'c-mode-hook 'lsp)
+;; (add-hook 'c++-mode-hook 'lsp)
+;; 
+;; (setq gc-cons-threshold (* 100 1024 1024)
+;;       read-process-output-max (* 1024 1024)
+;;       treemacs-space-between-root-nodes nil
+;;       company-idle-delay 0.0
+;;       company-minimum-prefix-length 1
+;;       lsp-idle-delay 0.1)  ;; clangd is fast
+;; 
+;; (with-eval-after-load 'lsp-mode
+;;   (add-hook 'lsp-mode-hook #'lsp-enable-which-key-integration)
+;;   (require 'dap-cpptools)
+;;   (yas-global-mode))
+;; 
+;; 
+;; 
+
+;; 
+;; ;; (use-package elpy
+;; ;;  :ensure t
+;; ;;  :init
+;; ;;  (elpy-enable))
+;; 
+;; ;; Download Evil
+;; (unless (package-installed-p 'evil)
+;;   (package-install 'evil))
+;; 
+;; ;; Enable Evil
+;; (require 'evil)
+;; (evil-mode 1)
+;; 
+
+
