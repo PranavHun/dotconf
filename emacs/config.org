@@ -1,51 +1,141 @@
 #+TITLE: Emacs Config
 #+AUTHOR: Pranav Hundekari (PranavHun)
 #+DESCRIPTION: Emacs config for C/C++, Python, Rust development.
-#+STARTUP: showeverything
-#+Options: toc: 3
-* Contents :toc:
+* Contents                                                            :TOC_3:
 - [[#elementary-configuration][Elementary Configuration]]
   - [[#packages][Packages]]
+    - [[#setup][Setup]]
+    - [[#look--feel][Look & Feel]]
+    - [[#org-mode][Org Mode]]
+    - [[#interface][Interface]]
+    - [[#coding][Coding]]
   - [[#emacs-interface][Emacs Interface]]
+    - [[#startup-screen][Startup Screen]]
+    - [[#sethide-interface-elements][Set/Hide interface elements]]
+    - [[#font][Font]]
+    - [[#theme][Theme]]
+    - [[#transparency][Transparency]]
+    - [[#key-bindings][Key Bindings]]
 - [[#rest][Rest]]
 
 * Elementary Configuration
 ** Packages
+*** Setup
 #+begin_src emacs-lisp
-      (require 'package)
-      (add-to-list 'package-archives
-		   '("melpa-stable" . "https://stable.melpa.org/packages/"))
-      (package-initialize)
+  (require 'package)
+  (add-to-list 'package-archives
+	       '("melpa-stable" . "https://stable.melpa.org/packages/"))
+  (add-to-list 'package-archives
+	       '("melpa" . "https://melpa.org/packages/"))
 
-      (use-package dracula-theme
-        :ensure t)
-      (use-package toc-org
-	:ensure t
-	:commands toc-org-enable
-	:init (add-hook 'org-mode-hook 'toc-org-enable))
-      (use-package org-bullets
-	:ensure t
-	:init (add-hook 'org-mode-hook (lambda () (org-bullets-mode 1))))
-      (use-package which-key
-	:ensure t
-	:init (which-key-mode 1)
-	:config
-	(setq which-key-side-window-location 'bottom
-	      whick-key-sort-order #'which-key-key-order-alpha
-	      which-key-sort-uppercase-first nil
-	      which-key-add-column-padding 1
-	      which-key-max-display-columns nil
-	      which-key-min-display-lines 6
-	      which-key-side-window-slot -10
-	      which-key-side-window-max-height 0.25
-	      which-key-dile-delay 0.8
-	      which-key-max-description-length 25
-	      which-key-allow-imprecise-window-fit t
-	      which-key-separator " → "))
-      (use-package evil
-	:ensure t
-	:init (evil-mode 1))
+  (package-initialize)
+#+end_src
+*** Look & Feel
+#+begin_src emacs-lisp
+  (use-package gruber-darker-theme
+    :ensure t)
+  (use-package dracula-theme
+    :ensure t)
+#+end_src
+*** Org Mode
+#+begin_src emacs-lisp
+  (use-package toc-org
+    :ensure t
+    :commands toc-org-enable
+    :init (add-hook 'org-mode-hook 'toc-org-enable))
+  (use-package org-bullets
+    :ensure t
+    :init (add-hook 'org-mode-hook (lambda () (org-bullets-mode 1))))
+#+end_src
+*** Interface
+#+begin_src emacs-lisp
+  (use-package which-key
+    :ensure t
+    :init (which-key-mode 1)
+    :config
+    (setq which-key-side-window-location 'bottom
+	  whick-key-sort-order #'which-key-key-order-alpha
+	  which-key-sort-uppercase-first nil
+	  which-key-add-column-padding 1
+	  which-key-max-display-columns nil
+	  which-key-min-display-lines 6
+	  which-key-side-window-slot -10
+	  which-key-side-window-max-height 0.25
+	  which-key-dile-delay 0.8
+	  which-key-max-description-length 25
+	  which-key-allow-imprecise-window-fit t
+	  which-key-separator " → "))
+#+end_src
+*** Coding
+#+begin_src emacs-lisp
+  ;; Company - Text completion
+  (use-package company
+    :ensure t
+    :init (add-hook 'after-init-hook 'global-company-mode))
+  ;; git
+  (use-package magit
+    :ensure t
+    :requires compat)
+  ;; Language server
+  (use-package lsp-mode
+    :ensure t)
+  ;; Macros
+  (use-package yasnippet
+    :ensure t
+    :hook ((text-mode
+	    prog-mode
+	    conf-mode
+	    snippet-mode) . yas-minor-mode-on)
+    :init
+    (setq yas-snippet-dir "~/.emacs.d/snippets"))
+  ;; string manipulation
+  (use-package s
+    :ensure t)
+  ;; python environment
+  (use-package pyvenv
+    :ensure t)
+  ;; clang format
+  (use-package clang-format
+    :ensure t)
+  ;; cmake highlight
+  (use-package cmake-mode
+    :ensure t)
+  ;; indentation guide 
+  (use-package highlight-indentation
+    :ensure t
+    :config
+    (set-face-background 'highlight-indentation-face "#e3e3d3")
+    (set-face-background 'highlight-indentation-current-column-face "#c3b3b3"))
+  ;; Rust
+  (use-package rustic
+    :ensure
+    :bind (:map rustic-mode-map
+		("M-j" . lsp-ui-imenu)
+		("M-?" . lsp-find-references)
+		("C-c C-c l" . flycheck-list-errors)
+		("C-c C-c a" . lsp-execute-code-action)
+		("C-c C-c r" . lsp-rename)
+		("C-c C-c q" . lsp-workspace-restart)
+		("C-c C-c Q" . lsp-workspace-shutdown)
+		("C-c C-c s" . lsp-rust-analyzer-status))
+    :config
+    ;; uncomment for less flashiness
+    ;; (setq lsp-eldoc-hook nil)
+    ;; (setq lsp-enable-symbol-highlighting nil)
+    ;; (setq lsp-signature-auto-activate nil)
 
+    ;; comment to disable rustfmt on save
+    (setq rustic-format-on-save t)
+    (add-hook 'rustic-mode-hook 'rk/rustic-mode-hook))
+
+  (defun rk/rustic-mode-hook ()
+    ;; so that run C-c C-c C-r works without having to confirm, but don't try to
+    ;; save rust buffers that are not file visiting. Once
+    ;; https://github.com/brotzeit/rustic/issues/253 has been resolved this should
+    ;; no longer be necessary.
+    (when buffer-file-name
+      (setq-local buffer-save-without-query t))
+    (add-hook 'before-save-hook 'lsp-format-buffer nil t))
 #+end_src
 ** Emacs Interface
 *** Startup Screen
@@ -57,43 +147,33 @@
     (let ((splash-screen-buffer (get-buffer-create "splashscreenbuf")))
       (with-current-buffer splash-screen-buffer
 	;; Buffer in insert
-	 (insert "\n\n\n\
-  \t\tPranav Hundekari\n\
-  \t\tEmacs Development Environment\n\
-  \t\thttps://github.com/PranavHun/\n\
-      _______                                              __    __                           \n\
-     /       \\                                            /  |  /  |                         \n\
-     $$$$$$$  |______  ______  _______   ______  __     __$$ |  $$ |__    __ _______          \n\
-     $$ |__$$ /      \\/      \\/       \\ /      \\/  \\   /  $$ |__$$ /  |  /  /       \\   \n\
-     $$    $$/$$$$$$  $$$$$$  $$$$$$$  |$$$$$$  $$  \\ /$$/$$    $$ $$ |  $$ $$$$$$$  |       \n\
-     $$$$$$$/$$ |  $$//    $$ $$ |  $$ |/    $$ |$$  /$$/ $$$$$$$$ $$ |  $$ $$ |  $$ |        \n\
-     $$ |    $$ |    /$$$$$$$ $$ |  $$ /$$$$$$$ | $$ $$/  $$ |  $$ $$ \\__$$ $$ |  $$ |       \n\
-     $$ |    $$ |    $$    $$ $$ |  $$ $$    $$ |  $$$/   $$ |  $$ $$    $$/$$ |  $$ |        \n\
-     $$/     $$/      $$$$$$$/$$/   $$/ $$$$$$$/    $/    $$/   $$/ $$$$$$/ $$/   $$/\n"))
-       (switch-to-buffer splash-screen-buffer)
-       (read-only-mode)(toggle-truncate-lines t)))
+	 (insert "\n\n\tEmacs Development Environment\n\t       Pranav Hundekari\n\thttps://github.com/PranavHun/\n\t         @PranavHun\n\t             🇮🇳\n"))
+       (let ((inhibit-message t)) (switch-to-buffer splash-screen-buffer)
+       (read-only-mode)(toggle-truncate-lines t))))
+  (let ((inhibit-message nil)))
 #+end_src
 *** Set/Hide interface elements
 #+begin_src emacs-lisp
-    (fringe-mode -1)
-    (menu-bar-mode -1)
-    (scroll-bar-mode -1)
-    (tool-bar-mode -1)
+  (fringe-mode -1)
+  (menu-bar-mode -1)
+  (scroll-bar-mode -1)
+  (tool-bar-mode -1)
   (global-display-line-numbers-mode 1)
   (global-visual-line-mode t)
+  (savehist-mode 1)
 #+end_src
 *** Font
 #+begin_src emacs-lisp
     (set-face-attribute 'default nil
-			:font "Source Code Pro"
+			:font "Ubuntu Mono"
 			:height 160
 			:weight 'regular)
     (set-face-attribute 'variable-pitch nil
-			:font "Cantarell"
+			:font "Ubuntu"
 			:height 160
 			:weight 'medium)
     (set-face-attribute 'fixed-pitch nil
-			:font "Source Code Pro"
+			:font "Ubuntu Mono"
 			:height 160
 			:weight 'regular)
     (set-face-attribute 'font-lock-comment-face nil
@@ -109,13 +189,19 @@
 *** Theme
 #+begin_src emacs-lisp
   ;; Dracula theme is downloaded at ./themes
- (load-theme 'dracula t)
+  ;; (load-theme 'dracula t)
+  (load-theme 'gruber-darker t)
 #+end_src
 *** Transparency
 #+begin_src emacs-lisp
-  (set-frame-parameter nil 'alpha-background 70)
+  (set-frame-parameter nil 'alpha-background 90)
   (set-frame-parameter nil 'background-color "black")
 #+end_src
+*** Key Bindings
+#+begin_src emacs-lisp
+  (global-set-key (kbd "M-o") 'other-window)
+#+end_src
+
 
 * Rest
 ;; 
